@@ -17,24 +17,21 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Install wget and https transport for apt
 RUN apt-get update && apt-get install -y \
   apt-transport-https \
-  wget
+  curl
 
-# Install the eventstore key and the apt repository
-RUN wget -O - https://apt-oss.geteventstore.com/eventstore.key | apt-key add - && \
-  echo "deb [arch=amd64] https://apt-oss.geteventstore.com/ubuntu/ trusty main" > /etc/apt/sources.list.d/eventstore.list && \
-  apt-get update
+RUN curl -s https://packagecloud.io/install/repositories/EventStore/EventStore-OSS/script.deb.sh | sudo bash
 
-# Install specific version of eventstore. Change to build a different versioned image
-RUN apt-get install -y eventstore-oss=3.3.0
+RUN apt-get install eventstore-oss=3.5.0
 
 # Expose the public/internal ports
 EXPOSE 2113 1113 2112 1112
 
 # Create the volumes
-VOLUME /var/lib/eventstore /var/log/eventstore
+VOLUME /data/logs 
+VOLUME /data/db
 
 # Run as eventstore user
-USER eventstore
+USER root
 
 # set entry point to eventstore executable
-ENTRYPOINT ["eventstored", "--log=/var/log/eventstore", "--db=/var/lib/eventstore"]
+ENTRYPOINT ["eventstored", "--log=/data/logs", "--db=/data/db", "--run-projections=all"]

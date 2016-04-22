@@ -1,7 +1,7 @@
 kind: ReplicationController
 apiVersion: v1
 metadata:
-  name: eventstore-cluster
+  name: eventstore-test
 spec:
   replicas: 3
   selector:
@@ -10,11 +10,11 @@ spec:
     metadata:
       labels:
         name: eventstore-node
-        app: eventstore-cluster
+        app: eventstore-test
     spec:
       containers:
       - name: eventstore-node
-        image: your.private.registry/eventstore
+        image: eu.gcr.io/aztechiot/eventstore:3.5.0
         livenessProbe:
           httpGet:
             path: /
@@ -52,7 +52,7 @@ spec:
         - name: EVENTSTORE_GOSSIP_ALLOWED_DIFFERENCE_MS
           value: "600000"
         volumeMounts:
-        - mountPath: /var/lib/eventstore
+        - mountPath: /data/db
           name: data
       volumes:
         - name: data
