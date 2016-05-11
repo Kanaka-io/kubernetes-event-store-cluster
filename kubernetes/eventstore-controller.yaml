@@ -1,16 +1,16 @@
 kind: ReplicationController
 apiVersion: v1
 metadata:
-  name: eventstore-test
+  name: eventstore-rc1
 spec:
-  replicas: 3
+  replicas: 1
   selector:
-    name: eventstore-node
+    name: eventstore-node1
   template:
     metadata:
       labels:
-        name: eventstore-node
-        app: eventstore-test
+        name: eventstore-node1
+        app: eventstore-rc
     spec:
       containers:
       - name: eventstore-node
@@ -41,6 +41,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
+        - name: EVENTSTORE_INT_TCP_PORT
+          value: "1112"
+        - name: EVENTSTORE_EXT_TCP_PORT
+          value: "1113"
         - name: EVENTSTORE_INT_HTTP_PORT
           value: "2113"
         - name: EVENTSTORE_EXT_HTTP_PORT
@@ -56,4 +60,139 @@ spec:
           name: data
       volumes:
         - name: data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: eventstore-volume-claim1
+            readOnly: false
+---
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: eventstore-rc2
+spec:
+  replicas: 1
+  selector:
+    name: eventstore-node2
+  template:
+    metadata:
+      labels:
+        name: eventstore-node2
+        app: eventstore-rc
+    spec:
+      containers:
+      - name: eventstore-node
+        image: eu.gcr.io/aztechiot/eventstore:3.5.0
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 2114
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+        ports:
+        - containerPort: 2113
+        - containerPort: 2114
+        - containerPort: 1113
+        - containerPort: 1112
+        env:
+        - name: EVENTSTORE_CLUSTER_SIZE
+          value: "3"
+        - name: EVENTSTORE_CLUSTER_GOSSIP_PORT
+          value: "2113"
+        - name: EVENTSTORE_CLUSTER_DNS
+          value: "eventstore-service.default.svc.cluster.local"
+        - name: EVENTSTORE_INT_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: EVENTSTORE_EXT_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: EVENTSTORE_INT_TCP_PORT
+          value: "1112"
+        - name: EVENTSTORE_EXT_TCP_PORT
+          value: "1113"
+        - name: EVENTSTORE_INT_HTTP_PORT
+          value: "2113"
+        - name: EVENTSTORE_EXT_HTTP_PORT
+          value: "2114"
+        - name: EVENTSTORE_EXT_HTTP_PREFIXES
+          value: "http://*:2114/"
+        - name: EVENTSTORE_INT_HTTP_PREFIXES
+          value: "http://*:2113/"
+        - name: EVENTSTORE_GOSSIP_ALLOWED_DIFFERENCE_MS
+          value: "600000"
+        volumeMounts:
+        - mountPath: /data/db
+          name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: eventstore-volume-claim2
+            readOnly: false
+
+---
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: eventstore-rc3
+spec:
+  replicas: 1
+  selector:
+    name: eventstore-node3
+  template:
+    metadata:
+      labels:
+        name: eventstore-node3
+        app: eventstore-rc
+    spec:
+      containers:
+      - name: eventstore-node
+        image: eu.gcr.io/aztechiot/eventstore:3.5.0
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 2114
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+        ports:
+        - containerPort: 2113
+        - containerPort: 2114
+        - containerPort: 1113
+        - containerPort: 1112
+        env:
+        - name: EVENTSTORE_CLUSTER_SIZE
+          value: "3"
+        - name: EVENTSTORE_CLUSTER_GOSSIP_PORT
+          value: "2113"
+        - name: EVENTSTORE_CLUSTER_DNS
+          value: "eventstore-service.default.svc.cluster.local"
+        - name: EVENTSTORE_INT_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: EVENTSTORE_EXT_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: EVENTSTORE_INT_TCP_PORT
+          value: "1112"
+        - name: EVENTSTORE_EXT_TCP_PORT
+          value: "1113"
+        - name: EVENTSTORE_INT_HTTP_PORT
+          value: "2113"
+        - name: EVENTSTORE_EXT_HTTP_PORT
+          value: "2114"
+        - name: EVENTSTORE_EXT_HTTP_PREFIXES
+          value: "http://*:2114/"
+        - name: EVENTSTORE_INT_HTTP_PREFIXES
+          value: "http://*:2113/"
+        - name: EVENTSTORE_GOSSIP_ALLOWED_DIFFERENCE_MS
+          value: "600000"
+        volumeMounts:
+        - mountPath: /data/db
+          name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: eventstore-volume-claim3
+            readOnly: false

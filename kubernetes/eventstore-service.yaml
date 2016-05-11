@@ -5,7 +5,7 @@ metadata:
 spec:
   clusterIP: None
   selector:
-    name: eventstore-node
+    app: eventstore-rc
   ports:
   - name: 'internal-http'
     protocol: TCP

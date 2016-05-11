@@ -1,0 +1,23 @@
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: mqtt-broker-test
+spec:
+  replicas: 1
+  selector:
+    name: mqtt-broker-node
+  template:
+    metadata:
+      labels:
+        name: mqtt-broker-node
+        app: mqtt-broker-test
+    spec:
+      containers:
+      - name: mqttbroker-node
+        image: eu.gcr.io/aztechiot/mqtt-broker:0.1-SNAPSHOT
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 1883
+        env:
+        - name: EVENTSTORE_SERVICE_HOST
+          value: "eventstore-service.default.svc.cluster.local"

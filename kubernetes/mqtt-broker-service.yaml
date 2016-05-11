@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mqtt-broker-service
+spec:
+  type: LoadBalancer
+  selector:
+    name: mqtt-broker-node
+  ports:
+  - name: 'external-tcp'
+    protocol: TCP
+    port: 1883
+    targetPort: 1883
